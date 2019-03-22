@@ -1,9 +1,13 @@
 #coding=utf-8
 from django.views import View  # 引入最基本的类视图
-from django.http import JsonResponse # 引入现成的响应类
+from django.http import JsonResponse, HttpResponse  # 引入现成的响应类
 from django.core.serializers import serialize  # 引入序列化函数
 from .models import CodeModel  # 引入 Code 模型，记得加个 `.`  哦。
 import json  # 引入 json 库，我们会用它来处理 json 字符串。
+from .mixins import APIDetailMixin, APIUpdateMixin, \
+    APIDeleteMixin, APIListMixin, APIRunCodeMixin, \
+    APICreateMixin, APIMethodMapMixin, APISingleObjectMixin  # 引入我们编写的所有 Mixin
+
 
 # 定义最基本的 API 视图
 # 定义最基本的 API 视图
@@ -37,6 +41,77 @@ class APIView(View):
         data = {'instances': instances}
         data.update(kwargs)  # 添加其他的字段
         return JsonResponse(data=data)  # 返回响应
+    
+
+class APICodeView(APIListMixin,  # 获取列表
+                  APIDetailMixin,  # 获取当前请求实例详细信息
+                  APIUpdateMixin,  # 更新当前请求实例
+                  APIDeleteMixin,  # 删除当前实例
+                  APICreateMixin,  # 创建新的的实例
+                  APIMethodMapMixin,  # 请求方法与资源操作方法映射
+                  APIView):  # 记得在最后继承 APIView
+    model = CodeModel  # 传入模型
+
+    def list(self):  # 这里仅仅是简单的给父类的 list 函数传参。
+        return super(APICodeView, self).list(fields=['name']) #super函数用来解决多重继承问题的
+    
+class APIRunCodeView(APIRunCodeMixin,
+                    APISingleObjectMixin,
+                    APIView):
+        model = CodeModel #传入模型
+        
+        def get(self, request, *arg, **kwargs):
+            """
+            GET 请求仅对能获取到PK值的URL响应
+            :param request:请求对象
+            :param args: 位置参数
+            :param kwargs: 关键子参数
+            :return: JsonResquest
+            """
+            instance = self.get_object() # 获取对象
+            code = instance.code # 获取代码
+            output = self.run_code(code) # 运行代码
+            return self.response(output=output, status = 'Successful Run') # 返回响应
+        
+        
+        def post(self, requeset, *args, **kwargs):
+            """
+            POST 请求可以被任意访问，并会检查 url参数中的save值，如果save为true则会保存上传代码。
+            :param request:请求对象
+            :param args: 位置参数
+            :param kwargs: 关键字参数
+            :return: JsonResponse 
+            """  
+            code = self.request.POST.get('code') # 获取代码
+            save = self.request.GET.get('save') == 'true' # 获取 save 参数值
+            name = self.request.POST.get('name') # 获取代码片段名称
+            output = self.run_code(code)  # 运行代码
+            if save: # 判断是否保存代码
+                instance = self.model.objects.create(name=name, code=code)
+            return self.response(status='Succeeful Run and Save', output=output) # 返回响应
+        
+                
+            
+            
+            
+            
+            
+            
+            
+            
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+
         
         
         

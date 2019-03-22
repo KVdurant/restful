@@ -1,6 +1,7 @@
 from django.db import models, IntegrityError # 查询失败时我们需要用到的模块
 import subprocess # 用于运行代码
 from django.http import Http404 # 当查询操作失败时返回404响应
+from matplotlib.pyplot import cla
 
 
 class APIQuerysetMinx(object):
@@ -52,10 +53,7 @@ class APISingleObjectMixin(APIQuerysetMinx):
                     raise Http404('NO object found.')#抛出404异常
         raise Http404('No object found.') #若遍历所有参数都未捕捉到值，则抛出404异常
     
-class APICreateMixin(APIQuerysetMinx):
-     """
-     API中的list操作
-     """
+class APIListMixin(APIQuerysetMinx):
      
      def list(self,fields=None):
          """
@@ -66,10 +64,11 @@ class APICreateMixin(APIQuerysetMinx):
          return self.response(
              queryset=self.get_queryset(),
              fields=fields)
+
+
          
-     """
-     API中的 create操作   
-     """
+class APICreateMixin(APIQuerysetMinx):  
+    
      def create(self,create_fields=None):
          """
                     使用传入的参数列表从 POST 值中获取对应参数值，并用这个值创建实例，
@@ -113,7 +112,7 @@ class APIDetailMixin(APISingleObjectMixin):
              fields =fields)
          
          
-class APIUpateMixin(APISingleObjectMixin):
+class APIUpdateMixin(APISingleObjectMixin):
      """
         API中更新实例操作
      """
@@ -138,8 +137,86 @@ class APIUpateMixin(APISingleObjectMixin):
          except IntegrityError: # 捕捉更新错误
              return self.response(status='Faild to update.') #返回更新失败响应
          return self.response(status='Successfully Upate.')#返回更新成功
-            
-            
+     
+
+class APIDeleteMixin(APISingleObjectMixin):
+         """
+         API 删除实例操作
+         """
+         def remove(self):
+             """
+                             删除当前请求中的实例，删除成功则返回删除成功响应。
+             :return: JsonResponse
+             """
+             
+             instance = self.get_object() #获取当前实例
+             instance.delete() # 删除实例
+             return self.response(status='Successfully Delete')  #返回删除成功
+
+
+class APIRunCodeMixin(object):
+    """
+            运行代码操作
+    """
+    def run_code(self, code):
+        """
+                    运行所给的代码，并返回执行结果
+        :param code: str, 需要被运行的代码
+        :return: str, 运行结果
+        """
+        try:
+            output = subprocess.check_output(['python', '-c', code], # 运行代码
+                                             stderr=subprocess.STDOUT, # 重定向错误输出流到子进程
+                                             universal_newlines=True, # 将返回执行结果转换为字符串
+                                             timeout=30) # 设定执行超时时间
+        except subprocess.CalledProcessError as e: # 捕捉执行失败异常
+            output = e.output # 获取子进程报错信息
+        except subprocess.TimeoutExpired as e: # 捕捉超时异常
+            output = '\r\n'.join(['Time Out!', e.output]) # 获取子进程报错，并添加运行超时提示
+        return output # 返回执行结果
+    
+class APIMethodMapMixin(object):
+    """
+         将请求方法映射到子类属性上
+    :method_map: dict, 方法映射字典。
+         如将 get 方法映射到 list 方法，其值则为 {'get':'list'}
+    """
+    
+    method_map = {}
+    def __init__(self,*args,**kwargs):
+        """
+                  映射请求方法。会从传入子类的关键字参数中寻找 method_map 参数，期望值为 dict类型。寻找对应参数值。
+                  若在类属性和传入参数中同时定义了 method_map ，则以传入参数为准。
+        :param args: 传入的位置参数
+        :param kwargs: 传入的关键字参数
+        """
+        method_map=kwargs['method_map'] if kwargs.get('method_map',None) \
+                                        else self.method_map # 获取 method_map 参数
+        for request_method, mapped_method in method_map.items(): # 迭代映射方法
+            mapped_method = getattr(self, mapped_method) # 获取被映射方法
+            method_proxy = self.view_proxy(mapped_method) # 设置对应视图代理
+            setattr(self, request_method, method_proxy) # 将视图代码映射到视图代理方法上
+        super(APIMethodMapMixin,self).__init__(*args,**kwargs) # 执行子类的其他初始化
+
+    def view_proxy(self, mapped_method):
+        """
+                    代理被映射方法，并代理接收传入视图函数的其他参数。
+        :param mapped_method: 被代理的映射方法
+        :return: function, 代理视图函数。
+        """
+        def view(*args, **kwargs):
+            """
+                            视图的代理方法
+            :param args: 传入视图函数的位置参数
+            :param kwargs: 传入视图函数的关键字参数
+            :return: 返回执行被映射方法
+            """
+            return mapped_method() # 返回执行代理方法
+        return view # 返回代理视图
+
+
+    
+
      
      
      
