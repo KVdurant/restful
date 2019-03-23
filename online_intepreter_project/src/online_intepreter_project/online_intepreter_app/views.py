@@ -90,6 +90,66 @@ class APIRunCodeView(APIRunCodeMixin,
                 instance = self.model.objects.create(name=name, code=code)
             return self.response(status='Succeeful Run and Save', output=output) # 返回响应
         
+        def put(self, request, *args, **kwargs):
+            """
+            PUT 请求仅对更改操作做出响应
+            :param reqest: 请求对象
+            :param args: 位置参数
+            :param kwargs: 关键字参数
+            :return: JsonResponse
+            """
+            code = self.request.PUT.get('code') # 获取代码
+            name = self.request.PUT.get('name') # 获取代码片段名称
+            save = self.request.GET.get('save') == 'save' #  获取 save 参数值
+            output = self.run_code(code) # 运行代码
+            if save: # 判断是否需要更改代码
+                instance = self.get_object() # 获取当前实例
+                setattr(instance, 'name', name) # 更改名字
+                setattr(instance, 'code', code) # 更改代码
+                instance.save()
+            return self.response(status='Scueessful Run and Save', output=output) # 返回响应
+                       
+# 主页视图
+def home(request):
+    """
+    读取 'index.html' 并返回响应
+    :param request: 请求对象
+    :return: HttpResponse
+    """
+    with open('frontend/index.html', 'rb') as f:
+        content = f.read()
+    return HttpResponse(content)
+
+
+# 读取 js 视图
+def js(request, filename):
+    """
+    读取 js 文件并返回 js 文件响应
+    :param request: 请求对象
+    :param filename: str-> 文件名
+    :return: HttpResponse
+    """
+    with open('frontend/js/{}'.format(filename), 'rb') as f:
+        js_content = f.read()
+    return HttpResponse(content=js_content,
+                        content_type='application/javascript')  # 返回 js 响应
+
+
+# 读取 css 视图
+def css(request, filename):
+    """
+    读取 css 文件，并返回 css 文件响应
+    :param request: 请求对象
+    :param filename: str-> 文件名
+    :return: HttpResponse
+    """
+    with open('frontend/css/{}'.format(filename), 'rb') as f:
+        css_content = f.read()
+    return HttpResponse(content=css_content,
+                        content_type='text/css')  # 返回 css 响应
+
+
+        
                 
             
             
