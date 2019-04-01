@@ -1,52 +1,35 @@
-"""online_intepreter_project URL Configuration
+#coding:utf-8
+# è¿™æ˜¯æˆ‘ä»¬çš„ URL å…¥å£é…ç½®ï¼Œæˆ‘ä»¬ç›´æ¥å°†å…¥å£é…ç½®åˆ°å…·ä½“çš„ URL ä¸Šã€‚
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.11/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
-"""
-from django.conf.urls import url
-from django.contrib import admin
+from django.conf.urls import url, include  # å¼•å…¥éœ€è¦ç”¨åˆ°çš„é…ç½®å‡½æ•°
+# include ç”¨æ¥å¼•å…¥å…¶ä»–çš„ URL é…ç½®ã€‚å‚æ•°å¯ä»¥æ˜¯ä¸ªè·¯å¾„å­—ç¬¦ä¸²ï¼Œä¹Ÿå¯ä»¥æ˜¯ä¸ª url å¯¹è±¡åˆ—è¡¨
 
-# ÕâÊÇÎÒÃÇµÄ URL Èë¿ÚÅäÖÃ£¬ÎÒÃÇÖ±½Ó½«Èë¿ÚÅäÖÃµ½¾ßÌåµÄ URL ÉÏ¡£
+from online_intepreter_app.views import APICodeView, APIRunCodeView, home, js, css  # å¼•å…¥æˆ‘ä»¬çš„è§†å›¾å‡½æ•°
+from django.views.decorators.csrf import csrf_exempt  # åŒæ ·çš„ï¼Œæˆ‘ä»¬ä¸éœ€è¦ä½¿ç”¨ csrf åŠŸèƒ½ã€‚
 
-from django.conf.urls import url, include  # ÒıÈëĞèÒªÓÃµ½µÄÅäÖÃº¯Êı
-# include ÓÃÀ´ÒıÈëÆäËûµÄ URL ÅäÖÃ¡£²ÎÊı¿ÉÒÔÊÇ¸öÂ·¾¶×Ö·û´®£¬Ò²¿ÉÒÔÊÇ¸ö url ¶ÔÏóÁĞ±í
+# æ³¨æ„æˆ‘ä»¬è¿™é‡Œçš„ csrf_exempt çš„ç”¨æ³•ï¼Œè¿™å’Œå°†å®ƒä½œä¸ºè£…é¥°å™¨ä½¿ç”¨çš„æ•ˆæœæ˜¯ä¸€æ ·çš„
 
-from online_intepreter_app.views import APICodeView, APIRunCodeView, home, js, css  # ÒıÈëÎÒÃÇµÄÊÓÍ¼º¯Êı
-from django.views.decorators.csrf import csrf_exempt  # Í¬ÑùµÄ£¬ÎÒÃÇ²»ĞèÒªÊ¹ÓÃ csrf ¹¦ÄÜ¡£
-
-# ×¢ÒâÎÒÃÇÕâÀïµÄ csrf_exempt µÄÓÃ·¨£¬ÕâºÍ½«Ëü×÷Îª×°ÊÎÆ÷Ê¹ÓÃµÄĞ§¹ûÊÇÒ»ÑùµÄ
-
-# ÆÕÍ¨µÄ¼¯ºÏ²Ù×÷ API
+# æ™®é€šçš„é›†åˆæ“ä½œ API
 generic_code_view = csrf_exempt(APICodeView.as_view(method_map={'get': 'list',
-                                                                'post': 'create'}))  # ´«Èë×Ô¶¨ÒåµÄ method_map ²ÎÊı
-# Õë¶ÔÄ³¸ö¶ÔÏóµÄ²Ù×÷ API
+                                                                'post': 'create'}))  # ä¼ å…¥è‡ªå®šä¹‰çš„ method_map å‚æ•°
+# é’ˆå¯¹æŸä¸ªå¯¹è±¡çš„æ“ä½œ API
 detail_code_view = csrf_exempt(APICodeView.as_view(method_map={'get': 'detail',
                                                                'put': 'update',
                                                                'delete': 'remove'}))
-# ÔËĞĞ´úÂë²Ù×÷ API
+# è¿è¡Œä»£ç æ“ä½œ API
 run_code_view = csrf_exempt(APIRunCodeView.as_view())
-# Code Ó¦ÓÃ API ÅäÖÃ
+# Code åº”ç”¨ API é…ç½®
 code_api = [
-    url(r'^$', generic_code_view, name='generic_code'),  # ¼¯ºÏ²Ù×÷
-    url(r'^(?P<pk>\d*)/$', detail_code_view, name='detail_code'),  # ·ÃÎÊÄ³¸öÌØ¶¨¶ÔÏó
-    url(r'^run/$', run_code_view, name='run_code'),  # ÔËĞĞ´úÂë
-    url(r'^run/(?P<pk>\d*)/$', run_code_view, name='run_specific_code')  # ÔËĞĞÌØ¶¨´úÂë
+    url(r'^$', generic_code_view, name='generic_code'),  # é›†åˆæ“ä½œ
+    url(r'^(?P<pk>\d*)/$', detail_code_view, name='detail_code'),  # è®¿é—®æŸä¸ªç‰¹å®šå¯¹è±¡
+    url(r'^run/$', run_code_view, name='run_code'),  # è¿è¡Œä»£ç 
+    url(r'^run/(?P<pk>\d*)/$', run_code_view, name='run_specific_code')  # è¿è¡Œç‰¹å®šä»£ç 
 ]
-api_v1 = [url('^codes/', include(code_api))]  # API µÄ v1 °æ±¾
-api_versions = [url(r'^v1/', include(api_v1))]  # API µÄ°æ±¾¿ØÖÆÈë¿Ú URL
+api_v1 = [url('^codes/', include(code_api))]  # API çš„ v1 ç‰ˆæœ¬
+api_versions = [url(r'^v1/', include(api_v1))]  # API çš„ç‰ˆæœ¬æ§åˆ¶å…¥å£ URL
 urlpatterns = [
-    url(r'^api/', include(api_versions)),  # API ·ÃÎÊ URL
-    url(r'^$', home, name='index'),  # Ö÷Ò³ÊÓÍ¼
-    url(r'^js/(?P<filename>.*\.js)$', js, name='js'),  # ·ÃÎÊ js ÎÄ¼ş£¬¼ÇµÃ£¬×îºóÃ»ÓĞ /
-    url(r'^css/(?P<filename>.*\.css)$', css, name='css')  # ·ÃÎÊ css ÎÄ¼ş£¬¼ÇµÃ£¬×îºóÃ»ÓĞ /
+    url(r'^api/', include(api_versions)),  # API è®¿é—® URL
+    url(r'^$', home, name='index'),  # ä¸»é¡µè§†å›¾
+    url(r'^js/(?P<filename>.*\.js)$', js, name='js'),  # è®¿é—® js æ–‡ä»¶ï¼Œè®°å¾—ï¼Œæœ€åæ²¡æœ‰ /
+    url(r'^css/(?P<filename>.*\.css)$', css, name='css')  # è®¿é—® css æ–‡ä»¶ï¼Œè®°å¾—ï¼Œæœ€åæ²¡æœ‰ /
 ]

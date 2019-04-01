@@ -1,25 +1,26 @@
-from django.db import models, IntegrityError # ²éÑ¯Ê§°ÜÊ±ÎÒÃÇĞèÒªÓÃµ½µÄÄ£¿é
-import subprocess # ÓÃÓÚÔËĞĞ´úÂë
-from django.http import Http404 # µ±²éÑ¯²Ù×÷Ê§°ÜÊ±·µ»Ø404ÏìÓ¦
+#coding:utf-8
+from django.db import models, IntegrityError # æŸ¥è¯¢å¤±è´¥æ—¶æˆ‘ä»¬éœ€è¦ç”¨åˆ°çš„æ¨¡å—
+import subprocess # ç”¨äºè¿è¡Œä»£ç 
+from django.http import Http404 # å½“æŸ¥è¯¢æ“ä½œå¤±è´¥æ—¶è¿”å›404å“åº”
 
 
 
 class APIQuerysetMinx(object):
     """
-    ÓÃÓÚ»ñÈ¡²éÑ¯¼¯¡£ÔÚÊ¹ÓÃÊ±£¬model ÊôĞÔºÍ queryset ÊôĞÔ±ØÓĞÆäÒ»¡£
+    ç”¨äºè·å–æŸ¥è¯¢é›†ã€‚åœ¨ä½¿ç”¨æ—¶ï¼Œmodel å±æ€§å’Œ queryset å±æ€§å¿…æœ‰å…¶ä¸€ã€‚
 
-    :model: Ä£ĞÍÀà
-    :queryet: ²éÑ¯¼¯
+    :model: æ¨¡å‹ç±»
+    :queryet: æŸ¥è¯¢é›†
     """
     model = None
     queryset =  None
     
     def get_queryset(self):
         """
-        »ñÈ¡²éÑ¯¼¯¡£ÈôÓĞ model ²ÎÊı£¬ÔòÄ¬ÈÏ·µ»ØËùÓĞµÄÄ£ĞÍ²éÑ¯ÊµÀı¡£
-        :return: ²éÑ¯¼¯
+        è·å–æŸ¥è¯¢é›†ã€‚è‹¥æœ‰ model å‚æ•°ï¼Œåˆ™é»˜è®¤è¿”å›æ‰€æœ‰çš„æ¨¡å‹æŸ¥è¯¢å®ä¾‹ã€‚
+        :return: æŸ¥è¯¢é›†
         """
-        #¼ìÑéÏàÓ¦²ÎÊıÊÇ·ñ±»´«Èë£¬ÈôÃ»ÓĞ´«ÔòÅ×³ö´íÎó
+        #æ£€éªŒç›¸åº”å‚æ•°æ˜¯å¦è¢«ä¼ å…¥ï¼Œè‹¥æ²¡æœ‰ä¼ åˆ™æŠ›å‡ºé”™è¯¯
         assert self.model or self.queryset, 'No queryset found.'
         if self.queryset:
             return self.queryset
@@ -29,36 +30,36 @@ class APIQuerysetMinx(object):
 
 class APISingleObjectMixin(APIQuerysetMinx):
     """
-        ÓÃÓÚ»ñÈ¡µ±Ç°ÇëÇóÖĞµÄÊµÀı
-    £ºlookup_args£» list,ÓÃÀ´¹æ¶¨²éÑ¯²ÎÊıµÄ²ÎÊıÁĞ±í¡£Ä¬ÈÏÎª['pk','id']
+        ç”¨äºè·å–å½“å‰è¯·æ±‚ä¸­çš„å®ä¾‹
+    ï¼šlookup_argsï¼› list,ç”¨æ¥è§„å®šæŸ¥è¯¢å‚æ•°çš„å‚æ•°åˆ—è¡¨ã€‚é»˜è®¤ä¸º['pk','id']
     
     """
     lookup_args = ['pk','id']
     
     def get_object(self):
         """
-        Í¨¹ı²éÑ¯ lookup_args ÖĞµÄ²ÎÊıÖµÀ´·µ»Øµ±Ç°ÇëÇóÊµÀı¡£µ±»ñÈ¡µ½²ÎÊıÖµÊ±£¬ÔòÍ£Ö¹
-        ¶ÔÖ®ºóµÄ²ÎÊı²éÑ¯¡£²ÎÊıË³ĞòºÜÖØÒª¡£
-        :return: Ò»¸öµ¥Ò»µÄ²éÑ¯ÊµÀı
+        é€šè¿‡æŸ¥è¯¢ lookup_args ä¸­çš„å‚æ•°å€¼æ¥è¿”å›å½“å‰è¯·æ±‚å®ä¾‹ã€‚å½“è·å–åˆ°å‚æ•°å€¼æ—¶ï¼Œåˆ™åœæ­¢
+        å¯¹ä¹‹åçš„å‚æ•°æŸ¥è¯¢ã€‚å‚æ•°é¡ºåºå¾ˆé‡è¦ã€‚
+        :return: ä¸€ä¸ªå•ä¸€çš„æŸ¥è¯¢å®ä¾‹
         """
         
-        queryset= self.get_queryset() #»ñÈ¡²éÑ¯¼¯
+        queryset= self.get_queryset() #è·å–æŸ¥è¯¢é›†
         for key in self.lookup_args:
             if self.kwargs.get(key):
                 id = self.kwargs[key]
                 try:
-                    instance= queryset.get(id=id) #»ñÈ¡µ±Ç°ÊµÀı
-                    return instance #ÊµÀı´æÔÚ¾Í·µ»ØÊµÀı
-                except models.ObjectDoesNotExist:   #²¶×½ÊµÀı²»´æÔÚÒì³£
-                    raise Http404('NO object found.')#Å×³ö404Òì³£
-        raise Http404('No object found.') #Èô±éÀúËùÓĞ²ÎÊı¶¼Î´²¶×½µ½Öµ£¬ÔòÅ×³ö404Òì³£
+                    instance= queryset.get(id=id) #è·å–å½“å‰å®ä¾‹
+                    return instance #å®ä¾‹å­˜åœ¨å°±è¿”å›å®ä¾‹
+                except models.ObjectDoesNotExist:   #æ•æ‰å®ä¾‹ä¸å­˜åœ¨å¼‚å¸¸
+                    raise Http404('NO object found.')#æŠ›å‡º404å¼‚å¸¸
+        raise Http404('No object found.') #è‹¥éå†æ‰€æœ‰å‚æ•°éƒ½æœªæ•æ‰åˆ°å€¼ï¼Œåˆ™æŠ›å‡º404å¼‚å¸¸
     
 class APIListMixin(APIQuerysetMinx):
      
      def list(self,fields=None):
          """
-                 ·µ»Ø²éÑ¯¼¯ÏìÓ¦
-        :param fields:²éÑ¯¼¯ÖĞÏ£Íû±»ÊµÀı»¯µÄ×Ö¶Î
+                 è¿”å›æŸ¥è¯¢é›†å“åº”
+        :param fields:æŸ¥è¯¢é›†ä¸­å¸Œæœ›è¢«å®ä¾‹åŒ–çš„å­—æ®µ
         :return: JsonResponse
          """
          return self.response(
@@ -69,39 +70,39 @@ class APICreateMixin(APIQuerysetMinx):
     
      def create(self,create_fields=None):
          """
-                    Ê¹ÓÃ´«ÈëµÄ²ÎÊıÁĞ±í´Ó POST ÖµÖĞ»ñÈ¡¶ÔÓ¦²ÎÊıÖµ£¬²¢ÓÃÕâ¸öÖµ´´½¨ÊµÀı£¬
-                    ³É¹¦´´½¨Ôò·µ»Ø´´½¨³É¹¦ÏìÓ¦£¬·ñÔò·µ»Ø´´½¨Ê§°ÜÏìÓ¦¡£
-        :param create_fields: list, Ï£Íû±»´´½¨µÄ×Ö¶Î¡£
-                    ÈôÎª None, ÔòÄ¬ÈÏÎª POST ÉÏ´«µÄËùÓĞ×Ö¶Î¡£
+                    ä½¿ç”¨ä¼ å…¥çš„å‚æ•°åˆ—è¡¨ä» POST å€¼ä¸­è·å–å¯¹åº”å‚æ•°å€¼ï¼Œå¹¶ç”¨è¿™ä¸ªå€¼åˆ›å»ºå®ä¾‹ï¼Œ
+                    æˆåŠŸåˆ›å»ºåˆ™è¿”å›åˆ›å»ºæˆåŠŸå“åº”ï¼Œå¦åˆ™è¿”å›åˆ›å»ºå¤±è´¥å“åº”ã€‚
+        :param create_fields: list, å¸Œæœ›è¢«åˆ›å»ºçš„å­—æ®µã€‚
+                    è‹¥ä¸º None, åˆ™é»˜è®¤ä¸º POST ä¸Šä¼ çš„æ‰€æœ‰å­—æ®µã€‚
         :return: JsonResponse
         """
          create_values={}
-         if create_fields: #Èç¹û´«ÈëÁËÏ£Íû±»´´½¨µÄ×Ö¶Î£¬Ôò´ÓpostÖĞ»ñÈ¡Ã¿¸öÖµ
+         if create_fields: #å¦‚æœä¼ å…¥äº†å¸Œæœ›è¢«åˆ›å»ºçš„å­—æ®µï¼Œåˆ™ä»postä¸­è·å–æ¯ä¸ªå€¼
              for field in create_fields:
                  create_values[field]=self.request.POST.get(field)
          
          else:
-            for key in self.request.POST: #ÈôÎ´´«ÈëÏ£Íû±»´´½¨×Ö¶Î£¬ÔòÄ¬ÈÏÎªPOSTÉÏ´«
-                                          #×Ö¶Î¶¼Îª´´½¨×Ö¶Î¡£
+            for key in self.request.POST: #è‹¥æœªä¼ å…¥å¸Œæœ›è¢«åˆ›å»ºå­—æ®µï¼Œåˆ™é»˜è®¤ä¸ºPOSTä¸Šä¼ 
+                                          #å­—æ®µéƒ½ä¸ºåˆ›å»ºå­—æ®µã€‚
                 create_values[key]=self.request.POST.get(key);
-         queryset = self.get_queryset()#»ñÈ¡²éÑ¯¼¯
+         queryset = self.get_queryset()#è·å–æŸ¥è¯¢é›†
          try:
-            instance = queryset.create(**create_values)# ÀûÓÃ²éÑ¯¼¯À´´´½¨ÊµÀı
-         except IntegrityError:# ²¶×½´´½¨Ê§°ÜÒì³£
-             return self.response(status='Failed to Create.')# ·µ»Ø´´½¨Ê§°ÜÏìÓ¦
-         return self.response(status='Successfuly Create.')# ´´½¨³É¹¦Ôò·µ»Ø´´½¨³É¹¦ÏìÓ¦
+            instance = queryset.create(**create_values)# åˆ©ç”¨æŸ¥è¯¢é›†æ¥åˆ›å»ºå®ä¾‹
+         except IntegrityError:# æ•æ‰åˆ›å»ºå¤±è´¥å¼‚å¸¸
+             return self.response(status='Failed to Create.')# è¿”å›åˆ›å»ºå¤±è´¥å“åº”
+         return self.response(status='Successfuly Create.')# åˆ›å»ºæˆåŠŸåˆ™è¿”å›åˆ›å»ºæˆåŠŸå“åº”
      
      
 
 class APIDetailMixin(APISingleObjectMixin):
      """
-     API ²Ù×÷ÖĞ²éÑ¯ÊµÀı²Ù×÷
+     API æ“ä½œä¸­æŸ¥è¯¢å®ä¾‹æ“ä½œ
      """
      
      def detail(self, fields=None):
          """
-                     ·µ»Øµ±Ç°ÇëÇóÖĞµÄÊµÀı
-          :param fields:Ï£Íû±»·µ»ØÊµÀıÖĞÄÇĞ©×Ö¶Î±»ÊµÀı»¯
+                     è¿”å›å½“å‰è¯·æ±‚ä¸­çš„å®ä¾‹
+          :param fields:å¸Œæœ›è¢«è¿”å›å®ä¾‹ä¸­é‚£äº›å­—æ®µè¢«å®ä¾‹åŒ–
           :return: JsonResponse 
          """
          
@@ -112,105 +113,105 @@ class APIDetailMixin(APISingleObjectMixin):
          
 class APIUpdateMixin(APISingleObjectMixin):
      """
-        APIÖĞ¸üĞÂÊµÀı²Ù×÷
+        APIä¸­æ›´æ–°å®ä¾‹æ“ä½œ
      """
      
      def update(self,update_fields=None):
          
          """
-                    ¸üĞÂµ±Ç°ÇëÇóÖĞÊµÀı¡£¸üĞÂ³É¹¦Ôò·µ»Ø³É¹¦ÏìÓ¦¡£·ñÔò£¬·µ»Ø¸üĞÂÊ§°ÜÏìÓ¦¡£
-                    Èô´«Èë updata_fields ¸üĞÂ×Ö¶ÎÁĞ±í£¬ÔòÖ»»á´Ó PUT ÉÏ´«ÖµÖĞ»ñÈ¡Õâ¸öÁĞ±íÖĞµÄ×Ö¶Î£¬
-                    ·ñÔòÄ¬ÈÏÎª¸üĞÂ POST ÉÏ´«ÖµÖĞËùÓĞµÄ×Ö¶Î¡£
-         :param update_fields: list, ÊµÀıĞèÒª±»¸üĞÂµÄ×Ö¶Î
+                    æ›´æ–°å½“å‰è¯·æ±‚ä¸­å®ä¾‹ã€‚æ›´æ–°æˆåŠŸåˆ™è¿”å›æˆåŠŸå“åº”ã€‚å¦åˆ™ï¼Œè¿”å›æ›´æ–°å¤±è´¥å“åº”ã€‚
+                    è‹¥ä¼ å…¥ updata_fields æ›´æ–°å­—æ®µåˆ—è¡¨ï¼Œåˆ™åªä¼šä» PUT ä¸Šä¼ å€¼ä¸­è·å–è¿™ä¸ªåˆ—è¡¨ä¸­çš„å­—æ®µï¼Œ
+                    å¦åˆ™é»˜è®¤ä¸ºæ›´æ–° POST ä¸Šä¼ å€¼ä¸­æ‰€æœ‰çš„å­—æ®µã€‚
+         :param update_fields: list, å®ä¾‹éœ€è¦è¢«æ›´æ–°çš„å­—æ®µ
          :return: JsonResponse
         """
-         instance = self.get_object() # »ñÈ¡µ±Ç°ÇëÇóÖĞµÄÊµÀı
-         if not update_fields: #ÈôÎŞ×Ö¶Î¸üĞÂÁĞ±í£¬ÔòÄ¬ÈÏÎªPUTÉÏ´«µÄËùÓĞÊı¾İ
+         instance = self.get_object() # è·å–å½“å‰è¯·æ±‚ä¸­çš„å®ä¾‹
+         if not update_fields: #è‹¥æ— å­—æ®µæ›´æ–°åˆ—è¡¨ï¼Œåˆ™é»˜è®¤ä¸ºPUTä¸Šä¼ çš„æ‰€æœ‰æ•°æ®
              update_fields=self.request.PUT.keys() 
-         try: # µü´ú¸üĞÂÊµÀı×Ö¶Î
+         try: # è¿­ä»£æ›´æ–°å®ä¾‹å­—æ®µ
              for field in update_fields:
-                 update_value =self.request.PUT.get(field)#´ÓPUTÖĞ»ñÈ¡Öµ
-                 setattr(instance, field, update_value) # ¸üĞÂ×Ö¶Î
-             instance.save() #±£´æÊµÀı¸üĞÂ
-         except IntegrityError: # ²¶×½¸üĞÂ´íÎó
-             return self.response(status='Faild to update.') #·µ»Ø¸üĞÂÊ§°ÜÏìÓ¦
-         return self.response(status='Successfully Upate.')#·µ»Ø¸üĞÂ³É¹¦
+                 update_value =self.request.PUT.get(field)#ä»PUTä¸­è·å–å€¼
+                 setattr(instance, field, update_value) # æ›´æ–°å­—æ®µ
+             instance.save() #ä¿å­˜å®ä¾‹æ›´æ–°
+         except IntegrityError: # æ•æ‰æ›´æ–°é”™è¯¯
+             return self.response(status='Faild to update.') #è¿”å›æ›´æ–°å¤±è´¥å“åº”
+         return self.response(status='Successfully Upate.')#è¿”å›æ›´æ–°æˆåŠŸ
      
 
 class APIDeleteMixin(APISingleObjectMixin):
          """
-         API É¾³ıÊµÀı²Ù×÷
+         API åˆ é™¤å®ä¾‹æ“ä½œ
          """
          def remove(self):
              """
-                             É¾³ıµ±Ç°ÇëÇóÖĞµÄÊµÀı£¬É¾³ı³É¹¦Ôò·µ»ØÉ¾³ı³É¹¦ÏìÓ¦¡£
+                             åˆ é™¤å½“å‰è¯·æ±‚ä¸­çš„å®ä¾‹ï¼Œåˆ é™¤æˆåŠŸåˆ™è¿”å›åˆ é™¤æˆåŠŸå“åº”ã€‚
              :return: JsonResponse
              """
              
-             instance = self.get_object() #»ñÈ¡µ±Ç°ÊµÀı
-             instance.delete() # É¾³ıÊµÀı
-             return self.response(status='Successfully Delete')  #·µ»ØÉ¾³ı³É¹¦
+             instance = self.get_object() #è·å–å½“å‰å®ä¾‹
+             instance.delete() # åˆ é™¤å®ä¾‹
+             return self.response(status='Successfully Delete')  #è¿”å›åˆ é™¤æˆåŠŸ
 
 
 class APIRunCodeMixin(object):
     """
-            ÔËĞĞ´úÂë²Ù×÷
+            è¿è¡Œä»£ç æ“ä½œ
     """
     def run_code(self, code):
         """
-                    ÔËĞĞËù¸øµÄ´úÂë£¬²¢·µ»ØÖ´ĞĞ½á¹û
-        :param code: str, ĞèÒª±»ÔËĞĞµÄ´úÂë
-        :return: str, ÔËĞĞ½á¹û
+                    è¿è¡Œæ‰€ç»™çš„ä»£ç ï¼Œå¹¶è¿”å›æ‰§è¡Œç»“æœ
+        :param code: str, éœ€è¦è¢«è¿è¡Œçš„ä»£ç 
+        :return: str, è¿è¡Œç»“æœ
         """
         try:
-            output = subprocess.check_output(['python', '-c', code], # ÔËĞĞ´úÂë
-                                             stderr=subprocess.STDOUT, # ÖØ¶¨Ïò´íÎóÊä³öÁ÷µ½×Ó½ø³Ì
-                                             universal_newlines=True, # ½«·µ»ØÖ´ĞĞ½á¹û×ª»»Îª×Ö·û´®
-                                             timeout=30) # Éè¶¨Ö´ĞĞ³¬Ê±Ê±¼ä
-        except subprocess.CalledProcessError as e: # ²¶×½Ö´ĞĞÊ§°ÜÒì³£
-            output = e.output # »ñÈ¡×Ó½ø³Ì±¨´íĞÅÏ¢
-        except subprocess.TimeoutExpired as e: # ²¶×½³¬Ê±Òì³£
-            output = '\r\n'.join(['Time Out!', e.output]) # »ñÈ¡×Ó½ø³Ì±¨´í£¬²¢Ìí¼ÓÔËĞĞ³¬Ê±ÌáÊ¾
-        return output # ·µ»ØÖ´ĞĞ½á¹û
+            output = subprocess.check_output(['python', '-c', code], # è¿è¡Œä»£ç 
+                                             stderr=subprocess.STDOUT, # é‡å®šå‘é”™è¯¯è¾“å‡ºæµåˆ°å­è¿›ç¨‹
+                                             universal_newlines=True, # å°†è¿”å›æ‰§è¡Œç»“æœè½¬æ¢ä¸ºå­—ç¬¦ä¸²
+                                             timeout=30) # è®¾å®šæ‰§è¡Œè¶…æ—¶æ—¶é—´
+        except subprocess.CalledProcessError as e: # æ•æ‰æ‰§è¡Œå¤±è´¥å¼‚å¸¸
+            output = e.output # è·å–å­è¿›ç¨‹æŠ¥é”™ä¿¡æ¯
+        except subprocess.TimeoutExpired as e: # æ•æ‰è¶…æ—¶å¼‚å¸¸
+            output = '\r\n'.join(['Time Out!', e.output]) # è·å–å­è¿›ç¨‹æŠ¥é”™ï¼Œå¹¶æ·»åŠ è¿è¡Œè¶…æ—¶æç¤º
+        return output # è¿”å›æ‰§è¡Œç»“æœ
     
 class APIMethodMapMixin(object):
     """
-         ½«ÇëÇó·½·¨Ó³Éäµ½×ÓÀàÊôĞÔÉÏ
-    :method_map: dict, ·½·¨Ó³Éä×Öµä¡£
-         Èç½« get ·½·¨Ó³Éäµ½ list ·½·¨£¬ÆäÖµÔòÎª {'get':'list'}
+         å°†è¯·æ±‚æ–¹æ³•æ˜ å°„åˆ°å­ç±»å±æ€§ä¸Š
+    :method_map: dict, æ–¹æ³•æ˜ å°„å­—å…¸ã€‚
+         å¦‚å°† get æ–¹æ³•æ˜ å°„åˆ° list æ–¹æ³•ï¼Œå…¶å€¼åˆ™ä¸º {'get':'list'}
     """
     
     method_map = {}
     def __init__(self,*args,**kwargs):
         """
-                  Ó³ÉäÇëÇó·½·¨¡£»á´Ó´«Èë×ÓÀàµÄ¹Ø¼ü×Ö²ÎÊıÖĞÑ°ÕÒ method_map ²ÎÊı£¬ÆÚÍûÖµÎª dictÀàĞÍ¡£Ñ°ÕÒ¶ÔÓ¦²ÎÊıÖµ¡£
-                  ÈôÔÚÀàÊôĞÔºÍ´«Èë²ÎÊıÖĞÍ¬Ê±¶¨ÒåÁË method_map £¬ÔòÒÔ´«Èë²ÎÊıÎª×¼¡£
-        :param args: ´«ÈëµÄÎ»ÖÃ²ÎÊı
-        :param kwargs: ´«ÈëµÄ¹Ø¼ü×Ö²ÎÊı
+                  æ˜ å°„è¯·æ±‚æ–¹æ³•ã€‚ä¼šä»ä¼ å…¥å­ç±»çš„å…³é”®å­—å‚æ•°ä¸­å¯»æ‰¾ method_map å‚æ•°ï¼ŒæœŸæœ›å€¼ä¸º dictç±»å‹ã€‚å¯»æ‰¾å¯¹åº”å‚æ•°å€¼ã€‚
+                  è‹¥åœ¨ç±»å±æ€§å’Œä¼ å…¥å‚æ•°ä¸­åŒæ—¶å®šä¹‰äº† method_map ï¼Œåˆ™ä»¥ä¼ å…¥å‚æ•°ä¸ºå‡†ã€‚
+        :param args: ä¼ å…¥çš„ä½ç½®å‚æ•°
+        :param kwargs: ä¼ å…¥çš„å…³é”®å­—å‚æ•°
         """
         method_map=kwargs['method_map'] if kwargs.get('method_map',None) \
-                                        else self.method_map # »ñÈ¡ method_map ²ÎÊı
-        for request_method, mapped_method in method_map.items(): # µü´úÓ³Éä·½·¨
-            mapped_method = getattr(self, mapped_method) # »ñÈ¡±»Ó³Éä·½·¨
-            method_proxy = self.view_proxy(mapped_method) # ÉèÖÃ¶ÔÓ¦ÊÓÍ¼´úÀí
-            setattr(self, request_method, method_proxy) # ½«ÊÓÍ¼´úÂëÓ³Éäµ½ÊÓÍ¼´úÀí·½·¨ÉÏ
-        super(APIMethodMapMixin,self).__init__(*args,**kwargs) # Ö´ĞĞ×ÓÀàµÄÆäËû³õÊ¼»¯
+                                        else self.method_map # è·å– method_map å‚æ•°
+        for request_method, mapped_method in method_map.items(): # è¿­ä»£æ˜ å°„æ–¹æ³•
+            mapped_method = getattr(self, mapped_method) # è·å–è¢«æ˜ å°„æ–¹æ³•
+            method_proxy = self.view_proxy(mapped_method) # è®¾ç½®å¯¹åº”è§†å›¾ä»£ç†
+            setattr(self, request_method, method_proxy) # å°†è§†å›¾ä»£ç æ˜ å°„åˆ°è§†å›¾ä»£ç†æ–¹æ³•ä¸Š
+        super(APIMethodMapMixin,self).__init__(*args,**kwargs) # æ‰§è¡Œå­ç±»çš„å…¶ä»–åˆå§‹åŒ–
 
     def view_proxy(self, mapped_method):
         """
-                    ´úÀí±»Ó³Éä·½·¨£¬²¢´úÀí½ÓÊÕ´«ÈëÊÓÍ¼º¯ÊıµÄÆäËû²ÎÊı¡£
-        :param mapped_method: ±»´úÀíµÄÓ³Éä·½·¨
-        :return: function, ´úÀíÊÓÍ¼º¯Êı¡£
+                    ä»£ç†è¢«æ˜ å°„æ–¹æ³•ï¼Œå¹¶ä»£ç†æ¥æ”¶ä¼ å…¥è§†å›¾å‡½æ•°çš„å…¶ä»–å‚æ•°ã€‚
+        :param mapped_method: è¢«ä»£ç†çš„æ˜ å°„æ–¹æ³•
+        :return: function, ä»£ç†è§†å›¾å‡½æ•°ã€‚
         """
         def view(*args, **kwargs):
             """
-                            ÊÓÍ¼µÄ´úÀí·½·¨
-            :param args: ´«ÈëÊÓÍ¼º¯ÊıµÄÎ»ÖÃ²ÎÊı
-            :param kwargs: ´«ÈëÊÓÍ¼º¯ÊıµÄ¹Ø¼ü×Ö²ÎÊı
-            :return: ·µ»ØÖ´ĞĞ±»Ó³Éä·½·¨
+                            è§†å›¾çš„ä»£ç†æ–¹æ³•
+            :param args: ä¼ å…¥è§†å›¾å‡½æ•°çš„ä½ç½®å‚æ•°
+            :param kwargs: ä¼ å…¥è§†å›¾å‡½æ•°çš„å…³é”®å­—å‚æ•°
+            :return: è¿”å›æ‰§è¡Œè¢«æ˜ å°„æ–¹æ³•
             """
-            return mapped_method() # ·µ»ØÖ´ĞĞ´úÀí·½·¨
-        return view # ·µ»Ø´úÀíÊÓÍ¼
+            return mapped_method() # è¿”å›æ‰§è¡Œä»£ç†æ–¹æ³•
+        return view # è¿”å›ä»£ç†è§†å›¾
 
 
     

@@ -1,4 +1,4 @@
-#coding=utf-8
+#coding:utf-8
 from django.views import View  # 引入最基本的类视图
 from django.http import JsonResponse, HttpResponse  # 引入现成的响应类
 from django.core.serializers import serialize  # 引入序列化函数
@@ -42,7 +42,7 @@ class APIView(View):
         data.update(kwargs)  # 添加其他的字段
         return JsonResponse(data=data)  # 返回响应
     
-
+  
 class APICodeView(APIListMixin,  # 获取列表
                   APIDetailMixin,  # 获取当前请求实例详细信息
                   APIUpdateMixin,  # 更新当前请求实例

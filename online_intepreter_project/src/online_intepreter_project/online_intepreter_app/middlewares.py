@@ -1,12 +1,13 @@
+#coding:utf-8
 from django.http import QueryDict
 def put_middleware(get_response):
     def middleware(request):
-        if request.method == 'PUT':  # Èç¹ûÊÇ PUT ÇëÇó
-            setattr(request, 'PUT', QueryDict(request.body))  # ¸øÇëÇóÉèÖÃ PUT ÊôĞÔ£¬ÕâÑùÎÒÃÇ¾Í¿ÉÒÔÔÚÊÓÍ¼º¯ÊıÖĞ·ÃÎÊÕâ¸öÊôĞÔÁË
-            # request.body ÊÇÇëÇóµÄÖ÷Ìå¡£ÎÒÃÇÖªµÀÇëÇóÓĞÇëÇóÍ·£¬ÄÇÇëÇóµÄÖ÷Ìå¾ÍÊÇ
-            # request.body ÁË¡£µ±È»£¬ÄãÒ»¶¨»¹»áÎÊ£¬ÎªÊ²Ã´ÕâÑù¾Í¿ÉÒÔ·ÃÎÊ PUT ÇëÇóµÄÏà¹Ø
-            # Êı¾İÁËÄØ£¿ÕâÉæ¼°µ½ÁË http Ğ­ÒéµÄÖªÊ¶£¬ÕâÀï¾Í²»Õ¹¿ªÁË£¬ÓĞĞËÈ¤µÄÍ¬Ñ§¿ÉÒÔ×ÔĞĞ²éÔÄ×ÊÁÏ
-        response = get_response(request)  # Ê¹ÓÃ get_response ·µ»ØÏìÓ¦
-        return response  # ·µ»ØÏìÓ¦
+        if request.method == 'PUT':  # å¦‚æœæ˜¯ PUT è¯·æ±‚
+            setattr(request, 'PUT', QueryDict(request.body))  # ç»™è¯·æ±‚è®¾ç½® PUT å±æ€§ï¼Œè¿™æ ·æˆ‘ä»¬å°±å¯ä»¥åœ¨è§†å›¾å‡½æ•°ä¸­è®¿é—®è¿™ä¸ªå±æ€§äº†
+            # request.body æ˜¯è¯·æ±‚çš„ä¸»ä½“ã€‚æˆ‘ä»¬çŸ¥é“è¯·æ±‚æœ‰è¯·æ±‚å¤´ï¼Œé‚£è¯·æ±‚çš„ä¸»ä½“å°±æ˜¯
+            # request.body äº†ã€‚å½“ç„¶ï¼Œä½ ä¸€å®šè¿˜ä¼šé—®ï¼Œä¸ºä»€ä¹ˆè¿™æ ·å°±å¯ä»¥è®¿é—® PUT è¯·æ±‚çš„ç›¸å…³
+            # æ•°æ®äº†å‘¢ï¼Ÿè¿™æ¶‰åŠåˆ°äº† http åè®®çš„çŸ¥è¯†ï¼Œè¿™é‡Œå°±ä¸å±•å¼€äº†ï¼Œæœ‰å…´è¶£çš„åŒå­¦å¯ä»¥è‡ªè¡ŒæŸ¥é˜…èµ„æ–™
+        response = get_response(request)  # ä½¿ç”¨ get_response è¿”å›å“åº”
+        return response  # è¿”å›å“åº”
 
-    return middleware  # ·µ»ØºËĞÄµÄÖĞ¼ä¼ş´¦Àíº¯Êı
+    return middleware  # è¿”å›æ ¸å¿ƒçš„ä¸­é—´ä»¶å¤„ç†å‡½æ•°
